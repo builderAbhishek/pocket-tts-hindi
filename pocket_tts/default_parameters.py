@@ -45,6 +45,11 @@ DEFAULT_TEXT_FOR_LANGUAGE = {
         "Soy lo suficientemente rápido para funcionar en pequeñas CPU. "
         "Espero que te guste."
     ),
+    "hindi": (
+        "नमस्ते दुनिया। मैं Pocket TTS हूँ। "
+        "मैं छोटे CPU पर हिंदी में बोल सकता हूँ। "
+        "मुझे उम्मीद है कि आपको मेरी आवाज़ पसंद आएगी।"
+    ),
 }
 
 DEFAULT_VOICE_FOR_LANGUAGE = {
@@ -72,14 +77,18 @@ def get_default_text_for_language(language: str | None) -> str:
 def get_default_voice_for_language(
     language: str | None, config: str | None = None, checkpoint: str | None = None
 ) -> str:
-    """The voice to use when the user didn't pick one.
+    """The voice to use when the user didn't pick one."""
 
-    `config` and `checkpoint` both mean custom weights, which cannot use the predefined
-    voices, hence the audio file instead of the voice name.
-    """
+    # Hindi model does not have a predefined voice embedding.
+    # Use the Alba reference audio directly for voice cloning.
+    if language is not None and "hindi" in language:
+        return _ORIGINS_OF_PREDEFINED_VOICES["alba"]
+
     if config is not None or checkpoint is not None:
         return DEFAULT_VOICE_FOR_CUSTOM_MODEL
+
     for key, voice in DEFAULT_VOICE_FOR_LANGUAGE.items():
         if language is not None and key in language:
             return voice
+
     return DEFAULT_VOICE_FALLBACK
